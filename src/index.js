@@ -4,9 +4,54 @@ import axios from 'axios';
 import debounce from 'lodash.debounce';
 import Notiflix from 'notiflix';
 
+const searchBox = document.querySelector("#search-box");
+const countryList= document.querySelector(".country-list");
+const countryInfo = document.querySelector(".country-info");
+
+searchBox.addEventListener('input', (e) => {
+  searchCountries(e.target.value, (countries)=> {
+    countryList.innerHTML = '';
+    countryInfo.innerHTML = '';
+    
+    if (countries.length == 0) {
+      return; 
+    }
+
+    if (countries.length == 1) {
+      let info = buildCountryInfo(countries.pop());
+      countryInfo.innerHTML = info;
+    } else {
+      let list = buildCountriesList(countries);
+      countryList.innerHTML = list;
+    }
+  });
+})
+
+function buildCountryInfo(country){
+    return `
+      <h1>${buildFlag(country.flags)} ${country.name}</h1>
+      <p><b>Capital</b>: ${country.capital}</p>
+      <p><b>Population</b>: ${country.population}</p>
+      <p><b>Languages</b>: ${country.languages.map(lang=> lang.name).join(", ")}</p>
+    `
+}
+
+function buildCountriesList(countries = []) {
+    let template = (country) => `
+      <li>${buildFlag(country.flags)} ${country.name}</li>
+    `;
+    let res = "";
+    countries.forEach((country) => res += template(country));
+    return res;
+}
+
+function buildFlag(flags) { 
+  return <img src="${flags.svg}" style="max-width: 30px; max-height: 20px;" />
+}
+
 export const fetchCountries = (name) => {
   const params = {
-    fields: 'name.official,capital,population,flags.svg,languages'
+    fields: 'name,capital,population,flags,languages'
   };
 
   return axios.get(`https://restcountries.com/v2/name/${name}`, { params })
@@ -32,16 +77,11 @@ export const searchCountries = debounce((searchValue, callback) => {
   fetchCountries(sanitizedValue)
     .then(data => {
       const numCountries = data.length;
-
       if (numCountries > 10) {
         Notiflix.Notify.info('Too many matches found. Please enter a more specific name.');
         callback([]);
-      } else if (numCountries >= 2 && numCountries <= 10) {
-        callback(data);
-      } else if (numCountries === 1) {
-        callback(data);
       } else {
-        callback([]);
+        callback(data);
       }
     })
     .catch(error => {
