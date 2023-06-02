@@ -548,7 +548,7 @@ function buildCountriesList(countries = []) {
     return res;
 }
 function buildFlag(flags) {
-    return '<img src="${flags.svg}" style="max-width: 30px; max-height: 20px;"/>';
+    return `<img src="${flags.svg}" style="max-width: 30px; max-height: 20px;"/>`;
 }
 const fetchCountries = (name)=>{
     const params = {
