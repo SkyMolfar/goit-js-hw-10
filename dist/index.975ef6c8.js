@@ -514,9 +514,45 @@ var _lodashDebounce = require("lodash.debounce");
 var _lodashDebounceDefault = parcelHelpers.interopDefault(_lodashDebounce);
 var _notiflix = require("notiflix");
 var _notiflixDefault = parcelHelpers.interopDefault(_notiflix);
+const searchBox = document.querySelector("#search-box");
+const countryList = document.querySelector(".country-list");
+const countryInfo = document.querySelector(".country-info");
+searchBox.addEventListener("input", (e)=>{
+    searchCountries(e.target.value, (countries)=>{
+        countryList.innerHTML = "";
+        countryInfo.innerHTML = "";
+        if (countries.length == 0) return;
+        if (countries.length == 1) {
+            let info = buildCountryInfo(countries.pop());
+            countryInfo.innerHTML = info;
+        } else {
+            let list = buildCountriesList(countries);
+            countryList.innerHTML = list;
+        }
+    });
+});
+function buildCountryInfo(country) {
+    return `
+      <h1>${buildFlag(country.flags)} ${country.name}</h1>
+      <p><b>Capital</b>: ${country.capital}</p>
+      <p><b>Population</b>: ${country.population}</p>
+      <p><b>Languages</b>: ${country.languages.map((lang)=>lang.name).join(", ")}</p>
+    `;
+}
+function buildCountriesList(countries = []) {
+    let template = (country)=>`
+      <li>${buildFlag(country.flags)} ${country.name}</li>
+    `;
+    let res = "";
+    countries.forEach((country)=>res += template(country));
+    return res;
+}
+function buildFlag(flags) {
+    return '<img src="${flags.svg}" style="max-width: 30px; max-height: 20px;"/>';
+}
 const fetchCountries = (name)=>{
     const params = {
-        fields: "name.official,capital,population,flags.svg,languages"
+        fields: "name,capital,population,flags,languages"
     };
     return (0, _axiosDefault.default).get(`https://restcountries.com/v2/name/${name}`, {
         params
@@ -539,9 +575,7 @@ const searchCountries = (0, _lodashDebounceDefault.default)((searchValue, callba
         if (numCountries > 10) {
             (0, _notiflixDefault.default).Notify.info("Too many matches found. Please enter a more specific name.");
             callback([]);
-        } else if (numCountries >= 2 && numCountries <= 10) callback(data);
-        else if (numCountries === 1) callback(data);
-        else callback([]);
+        } else callback(data);
     }).catch((error)=>{
         if (error.message === "Country not found") (0, _notiflixDefault.default).Notify.failure("Oops, there is no country with that name.");
         else console.log("\u041F\u043E\u043C\u0438\u043B\u043A\u0430 \u043F\u0440\u0438 \u0432\u0438\u043A\u043E\u043D\u0430\u043D\u043D\u0456 \u043F\u043E\u0448\u0443\u043A\u0443 \u043A\u0440\u0430\u0457\u043D:", error);
