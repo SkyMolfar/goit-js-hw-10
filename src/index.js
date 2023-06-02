@@ -46,7 +46,7 @@ function buildCountriesList(countries = []) {
 }
 
 function buildFlag(flags) { 
-  return '<img src="${flags.svg}" style="max-width: 30px; max-height: 20px;"/>'
+  return `<img src="${flags.svg}" style="max-width: 30px; max-height: 20px;"/>`
 }
 
 export const fetchCountries = (name) => {
